@@ -2,6 +2,7 @@
 
 #include "Utilities/mutex.h"
 #include "VKRenderPass.h"
+#include "VKHelpers.h"
 #include "vkutils/image.h"
 
 #include "Emu/RSX/Common/unordered_map.hpp"
@@ -381,6 +382,16 @@ namespace vk
 
 	void end_renderpass(const vk::command_buffer& cmd)
 	{
+		// A query that began inside a render pass instance has to end inside that same instance.
+		// Ending the pass underneath an open one leaves it permanently unavailable, the driver
+		// never marks it ready, which on some drivers just hangs the GPU.
+		//
+		// Queries do begin inside render passes here. VKDraw only lifts them out with use_strict_query_scopes().
+		if (cmd.flags & vk::command_buffer::cb_has_open_query)
+		{
+			do_query_cleanup(const_cast<vk::command_buffer&>(cmd));
+		}
+
 		vkCmdEndRenderPass(cmd);
 		g_current_renderpass[cmd] = {};
 	}
