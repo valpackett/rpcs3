@@ -149,6 +149,12 @@ namespace vk
 		case driver_vendor::ARM_MALI:
 			// Needs more testing
 			break;
+		case driver_vendor::QUALCOMM:
+			// Needs more testing
+			break;
+		case driver_vendor::TURNIP:
+			// Needs more testing
+			break;
 		default:
 			rsx_log.warning("Unsupported device: %s", gpu_name);
 		}
